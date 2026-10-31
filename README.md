@@ -18,17 +18,10 @@ CRUD de productos en .NET 8 usando ADO.NET (`MySqlConnector`) con patrón Reposi
 | PUT | /api/productos/{id} | Actualizar |
 | DELETE | /api/productos/{id} | Eliminar |
 
-## Flujo
-1. **Cliente (Swagger)** envía una petición HTTP, por ejemplo `POST /api/productos`.
-2. **Controller** recibe la petición, valida el modelo y llama a `IProductoRepository`. No contiene SQL.
-3. **Inyección de dependencias** (`Program.cs`) entrega `ProductoRepository` como implementación de la interfaz.
-4. **Repositorio (ADO.NET)**, en cada operación:
-   - Abre un `MySqlConnection` con la cadena de `appsettings.json`.
-   - Crea un `MySqlCommand` con parámetros (evita SQL Injection).
-   - Ejecuta `ExecuteReader` (consultas y búsqueda), `ExecuteScalar` (insert, devuelve el Id) o `ExecuteNonQuery` (update y delete).
-   - Cierra la conexión automáticamente con `using`.
-5. **MySQL** procesa la sentencia sobre la tabla `Productos`.
-6. **Respuesta**: el repositorio devuelve datos, un `bool` o el Id al controller, que responde `200`, `201`, `204` o `404`. Swagger muestra el resultado.
-
-## Evidencias
-Capturas de Swagger en la carpeta `evidencias/`.
+Flujo
+Desde Swagger se envía una petición HTTP a la API, por ejemplo un POST /api/productos para agregar un producto.
+El controlador recibe la petición y llama al repositorio a través de la interfaz IProductoRepository. Aquí no se escribe nada de SQL, solo se decide qué método usar.
+En Program.cs se configuró la inyección de dependencias, que es lo que le entrega al controlador la clase ProductoRepository cuando pide la interfaz.
+El repositorio es el que trabaja con la base de datos usando ADO.NET. En cada operación abre una conexión con MySqlConnection, usando la cadena que está en appsettings.json. Después arma el comando con MySqlCommand y le pasa los valores como parámetros, para evitar SQL Injection. Según lo que haga, ejecuta el comando con ExecuteReader (consultas y búsqueda), ExecuteScalar (insertar, para obtener el Id nuevo) o ExecuteNonQuery (actualizar y eliminar). Al terminar, la conexión se cierra sola gracias al using.
+MySQL ejecuta la instrucción sobre la tabla Productos y regresa el resultado.
+El repositorio le devuelve al controlador los datos, un true o false, o el Id del nuevo producto. El controlador responde con un código HTTP (200, 201, 204 o 404) y Swagger muestra el resultado en pantalla.
